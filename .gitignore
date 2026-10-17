@@ -9,7 +9,7 @@ build/
 
 # Local configuration and Cache
 .cache/
-./examples/my.json
+examples/my.json
 
 # Audio files
 *.mp3
