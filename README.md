@@ -106,3 +106,9 @@ uv tool install .
 
 ## Privacy & Network Disclosure
 Microsoft Edge TTS is a cloud service. Text extracted from configured source fields is transmitted via TLS-encrypted connections directly to Microsoft Edge TTS endpoints solely to generate audio files. No personal Anki note metadata, deck statistics, or personal identifiers are stored or transmitted.
+
+---
+
+## Acknowledgments & Inspiration
+
+This project was inspired by [krmanik/anki-tts](https://github.com/krmanik/anki-tts).
