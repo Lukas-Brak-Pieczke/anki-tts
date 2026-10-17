@@ -1,0 +1,15 @@
+{
+  "anki_url": "http://127.0.0.1:8765",
+  "edge_tts_binary": "",
+  "tasks": [
+    {
+      "name": "Basic Card - Front Audio",
+      "deck": "Finnish 1",
+      "model": "Basic",
+      "source_field": "Front",
+      "target_field": "Front",
+      "voice": "fi-FI-HarriNeural",
+      "overwrite_mode": "skip_if_exists"
+    }
+  ]
+}

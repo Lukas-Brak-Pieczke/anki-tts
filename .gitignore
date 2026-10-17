@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.venv/
+
+# Local configuration and Cache
+.cache/
+./examples/my.json
+
+# Audio files
+*.mp3
+
+# IDE & System
+.DS_Store
+.idea/
+.vscode/
+

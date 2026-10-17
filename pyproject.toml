@@ -1,0 +1,20 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "anki-tts"
+version = "0.1.0"
+description = "A safe, standalone CLI tool to generate TTS audio for Anki cards using Edge TTS and AnkiConnect."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = [
+    "edge-tts>=6.1.0",
+]
+
+[project.scripts]
+anki-tts = "anki_tts.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/anki_tts"]
