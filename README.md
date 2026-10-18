@@ -25,17 +25,37 @@ An interactive, high-performance CLI tool for automatically generating Text-to-S
 
 ---
 
+
 ## 🚀 Quick Start
 
-### 1. Launch Interactive Mode
+### 📦 Option 1: Standalone Executable (Recommended for Non-Developers)
 
-Ensure Anki Desktop is running, then execute:
+No Python, `uv`, or command-line installation is required.
+
+1. **Ensure Anki Desktop is running** with the **AnkiConnect** add-on enabled (`code: 2055492159`).
+2. Go to the [**Latest Releases Page**](https://github.com/Lukas-Brak-Pieczke/anki-tts/releases/latest) (located in the right sidebar of this repository).
+3. Download the executable built for your operating system:
+   - 💻 **Windows**: Download `anki-tts-windows.exe` and double-click to run.
+   - 🍏 **macOS**: Download `anki-tts-macos` and run it via Terminal or right-click to open.
+   - 🐧 **Linux**: Download `anki-tts-linux`, grant execution rights (`chmod +x anki-tts-linux`), and run.
+
+---
+
+### 🛠️ Option 2: Run from Source (For Developers)
+
+If you have Python 3.10+ and [`uv`](https://github.com/astral-sh/uv) installed:
 
 ```bash
-  uv run anki-tts
+# Launch interactive mode directly
+uv run anki-tts
+
+# Optional safety flags
+uv run anki-tts --dry-run
+uv run anki-tts --limit 5
 ```
 
 ---
+
 ## Useful Flags
 
 ```bash
