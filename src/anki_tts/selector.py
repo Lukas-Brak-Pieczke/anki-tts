@@ -123,7 +123,7 @@ def discover_and_select_decks(client: AnkiClient | None = None) -> list[dict]:
     try:
         decks = client.invoke("deckNames")
     except Exception as e:
-        print(f"❌ Error communicating with Anki: {e}")
+        print(f"Error communicating with Anki: {e}")
         sys.exit(1)
 
     decks = [d for d in decks if d != "Default"]
