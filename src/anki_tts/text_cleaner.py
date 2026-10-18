@@ -1,6 +1,14 @@
 import html
 import re
 
+"""
+Text Normalization Utility.
+
+Cleans HTML markup, unescapes HTML entities, removes existing Anki `[sound:...]` tags,
+and normalizes whitespace to prepare card field text for speech synthesis.
+"""
+
+
 def clean_text(text: str) -> str:
     if not text:
         return ""

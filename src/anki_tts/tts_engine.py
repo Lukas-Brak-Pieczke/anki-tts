@@ -2,14 +2,24 @@ import hashlib
 import os
 import subprocess
 
-class TTSEngine:
 
+"""
+Edge TTS Audio Generation Engine.
+
+Invokes the `edge-tts` CLI executable using argument-safe syntax (`--text=...`)
+to synthesize text into MP3 files with MD5-hash-based file caching.
+"""
+
+
+class TTSEngine:
     def __init__(self, edge_tts_binary: str = ""):
         self.binary = edge_tts_binary if edge_tts_binary else "edge-tts"
 
-    def generate(self, text: str, voice: str = "fi-FI-HarriNeural") -> str:
+    def generate(self, text: str, voice: str) -> str:
         if not text:
             raise ValueError("Text for TTS generation cannot be empty.")
+        if not voice:
+            raise ValueError("Voice for TTS generation must be specified.")
 
         hash_id = hashlib.md5(f"{voice}:{text}".encode("utf-8")).hexdigest()[:12]
         filename = f"tts_{hash_id}.mp3"
@@ -19,12 +29,9 @@ class TTSEngine:
 
         cmd = [
             self.binary,
-            "--voice",
-            voice,
-            "--text",
-            text,
-            "--write-media",
-            filename,
+            f"--voice={voice}",
+            f"--text={text}",
+            f"--write-media={filename}",
         ]
 
         try:

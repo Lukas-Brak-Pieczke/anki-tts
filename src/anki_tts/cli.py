@@ -1,12 +1,19 @@
 import argparse
 import json
-import os
 import sys
 
 from .anki_client import AnkiClient
-from .selector import discover_and_select_decks
+from .selector import discover_and_select_decks, select_voice_for_deck
 from .text_cleaner import clean_text
 from .tts_engine import TTSEngine
+
+
+"""
+Command Line Interface (CLI) for Anki TTS.
+
+Orchestrates the application flow: parses CLI arguments, triggers interactive deck/voice
+selection or loads a legacy JSON configuration file, and executes batch TTS task processing.
+"""
 
 
 def process_tasks(config: dict, dry_run: bool = False, limit: int | None = None):
@@ -29,13 +36,13 @@ def process_tasks(config: dict, dry_run: bool = False, limit: int | None = None)
         model = task.get("model")
         source_field = task.get("source_field", "Front")
         target_field = task.get("target_field", "Front")
-        voice = task.get("voice", "fi-FI-HarriNeural")
+        voice = task.get("voice")
         overwrite_mode = task.get("overwrite_mode", "skip_if_exists")
 
-        print(f"--- Running Task: {task_name} (Deck: '{deck}', Note Type: '{model}') ---")
+        print(f"--- Running Task: {task_name} (Deck: '{deck}', Voice: '{voice}') ---")
 
         query = f'deck:"{deck}"'
-        if model:
+        if model and model != "Unknown":
             query += f' "note:{model}"'
 
         note_ids = client.find_notes(query)
@@ -61,8 +68,12 @@ def process_tasks(config: dict, dry_run: bool = False, limit: int | None = None)
                 continue
 
             available_fields = list(fields.keys())
-            actual_source = source_field if source_field in fields else available_fields[0]
-            actual_target = target_field if target_field in fields else available_fields[0]
+            actual_source = (
+                source_field if source_field in fields else available_fields[0]
+            )
+            actual_target = (
+                target_field if target_field in fields else available_fields[0]
+            )
 
             raw_text = fields[actual_source].get("value", "")
             cleaned_text = clean_text(raw_text)
@@ -88,7 +99,11 @@ def process_tasks(config: dict, dry_run: bool = False, limit: int | None = None)
                     elif overwrite_mode == "append":
                         new_val = f"{target_val} {sound_tag}".strip()
                     else:
-                        new_val = sound_tag if not target_val else f"{target_val} {sound_tag}".strip()
+                        new_val = (
+                            sound_tag
+                            if not target_val
+                            else f"{target_val} {sound_tag}".strip()
+                        )
 
                     client.update_note_fields(note["noteId"], {actual_target: new_val})
 
@@ -98,7 +113,7 @@ def process_tasks(config: dict, dry_run: bool = False, limit: int | None = None)
                 )
                 processed += 1
             except Exception as e:
-                print(f"❌ Error processing Note ID {note.get('noteId')}: {e}")
+                print(f"Error processing Note ID {note.get('noteId')}: {e}")
                 errors += 1
 
         print(
@@ -111,14 +126,8 @@ def main():
     parser.add_argument(
         "-c",
         "--config",
-        default="config.json",
-        help="Path to configuration file (default: config.json)",
-    )
-    parser.add_argument(
-        "-i",
-        "--interactive",
-        action="store_true",
-        help="Force interactive deck selection mode",
+        default=None,
+        help="Path to JSON config file (legacy / batch mode)",
     )
     parser.add_argument(
         "--dry-run",
@@ -133,17 +142,19 @@ def main():
     )
     args = parser.parse_args()
 
-    if args.interactive or not os.path.exists(args.config):
-        if not os.path.exists(args.config) and not args.interactive:
-            print("Configuration file not found. Falling back to interactive mode.\n")
-
-        selected_decks = discover_and_select_decks()
+    if args.config:
+        with open(args.config, "r", encoding="utf-8") as f:
+            config = json.load(f)
+    else:
+        client = AnkiClient()
+        selected_decks = discover_and_select_decks(client)
         if not selected_decks:
             print("No decks selected. Exiting.")
             sys.exit(0)
 
         tasks = []
         for item in selected_decks:
+            voice = select_voice_for_deck(item["deck"])
             tasks.append(
                 {
                     "name": f"Auto Task - {item['deck']}",
@@ -151,7 +162,7 @@ def main():
                     "model": item["model"],
                     "source_field": "Front",
                     "target_field": "Front",
-                    "voice": "fi-FI-HarriNeural",
+                    "voice": voice,
                     "overwrite_mode": "skip_if_exists",
                 }
             )
@@ -161,9 +172,6 @@ def main():
             "edge_tts_binary": "",
             "tasks": tasks,
         }
-    else:
-        with open(args.config, "r", encoding="utf-8") as f:
-            config = json.load(f)
 
     process_tasks(config, dry_run=args.dry_run, limit=args.limit)
 
