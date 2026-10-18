@@ -118,7 +118,7 @@ def discover_and_select_decks(client: AnkiClient | None = None) -> list[dict]:
     if client is None:
         client = AnkiClient()
 
-    print("🔍 Discovering available decks in Anki...\n")
+    print("Discovering available decks in Anki...\n")
 
     try:
         decks = client.invoke("deckNames")
@@ -180,13 +180,13 @@ def discover_and_select_decks(client: AnkiClient | None = None) -> list[dict]:
 
     for p in parts:
         if not p.isdigit():
-            print(f"❌ Error: Invalid deck selection input '{p}'. Exiting.")
+            print(f"Error: Invalid deck selection input '{p}'. Exiting.")
             sys.exit(1)
 
         idx = int(p)
         found = [item for item in discovered if item["id"] == idx]
         if not found:
-            print(f"❌ Error: Deck ID [{idx}] does not exist. Exiting.")
+            print(f"Error: Deck ID [{idx}] does not exist. Exiting.")
             sys.exit(1)
 
         selected_items.extend(found)
