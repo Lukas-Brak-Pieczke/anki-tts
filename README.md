@@ -1,32 +1,53 @@
-# Anki Media TTS Generator
+# Anki TTS Generator (`anki-tts`)
 
-A lightweight, standalone CLI tool to generate high-quality Text-to-Speech (TTS) audio for Anki cards using Microsoft Edge TTS and AnkiConnect.
+An interactive, high-performance CLI tool for automatically generating Text-to-Speech (TTS) audio for Anki flashcards using Microsoft Edge's neural voices (`edge-tts`) and `AnkiConnect`.
 
 ---
 
-## Requirements & Quick Start
+## ✨ Features
 
-### Requirements
-1. **Python 3.10+**
-2. **Anki Desktop** running with the **AnkiConnect** add-on installed (Code: `2055492153`).
-3. [`uv`](https://github.com/astral-sh/uv) package manager.
+- **Interactive First Workflow**: Launch `anki-tts` directly—no manual JSON configuration required.
+- **Automatic Deck Discovery**: Connects to running Anki instance, listing decks, card types, and note counts.
+- **Smart Voice Presets**: Choose from curated neural voices across multiple languages or specify custom Edge TTS voice IDs. Selections are stored locally in `~/.config/anki-tts/presets.json`.
+- **Hardened Input Processing**: Safely handles complex text, HTML tags, HTML entities, sound tag collisions, and prefix hyphens (e.g., `-o`, `-a` in Esperanto or language suffixes).
+- **Safety Options**:
+  - `--dry-run`: Simulate audio generation and view exact note field targets without touching your Anki database.
+  - `--limit`: Restrict batch operations to a test subset of cards.
+- **Legacy Batch Support**: Pass a custom JSON configuration file via `-c` / `--config` for automated workflows.
 
-### Quick Start
+---
 
-A default `config.json` is already provided at the root of the project. You can edit it directly or optionally copy a template from `examples/`:
+## 📋 Requirements
+
+1. **Anki Desktop** running locally with the **AnkiConnect** add-on installed (`code: 2055492159`).
+2. **Python 3.10+** and [uv](https://github.com/astral-sh/uv) installed.
+3. `edge-tts` available in your environment (installed automatically via `uv`).
+
+---
+
+## 🚀 Quick Start
+
+### 1. Launch Interactive Mode
+
+Ensure Anki Desktop is running, then execute:
 
 ```bash
-# Optional: Use a specific template from examples/
-# cp examples/basic_and_reversed.json config.json
-# cp examples/dedicated_audio.json config.json
-# cp examples/multilingual.json config.json
-
-# 1. Run unit tests
-uv run python -m unittest discover tests
-
-# 2. Preview changes (Dry-Run by default)
-uv run anki-tts
+  uv run anki-tts
 ```
+
+---
+## Useful Flags
+
+```bash
+  # Test generation without modifying Anki
+  uv run anki-tts --dry-run
+
+  # Limit processing to the first 5 notes per task (useful for testing)
+  uv run anki-tts --limit 5
+
+  # Combine flags
+  uv run anki-tts --dry-run --limit 2
+ ```
 
 ---
 
@@ -45,20 +66,27 @@ uv run edge-tts --list-voices | grep en-US
 uv run edge-tts --list-voices | grep ja-JP
 ``` 
 
-C### Popular Voice Examples
+### Popular Voice Examples
 - **Finnish**: `"fi-FI-HarriNeural"`, `"fi-FI-SelmaNeural"`
 - **Polish**: `"pl-PL-MarekNeural"`, `"pl-PL-ZofiaNeural"`
 - **English (US)**: `"en-US-AvaNeural"`, `"en-US-AndrewNeural"`
 - **German**: `"de-DE-KillianNeural"`, `"de-DE-KatjaNeural"`
 
-copy the desired voice identifier into the "voice" field in your config.json.
+Enter any voice identifier directly when selecting the Custom voice ID option in anki-tts interactive prompt, or use it inside your batch config.json.
 
-## Configuration Reference (config.json)
+---
 
+## Advanced / Batch Mode
+
+If you still prefer file-based batch configurations, pass a JSON file using -c:
+```bash
+uv run anki-tts -c path/to/config.json
+```
+
+Sample JSON structure:
 ```json
 {
-  "anki_url": "http://127.0.0.1:8765",
-  "edge_tts_binary": "",
+  "anki_url": "(http://127.0.0.1:8765)",
   "tasks": [
     {
       "name": "Finnish Vocabulary",
@@ -71,35 +99,6 @@ copy the desired voice identifier into the "voice" field in your config.json.
     }
   ]
 }
-```
-
-| Parameter | Options / Default | Description |
-| :--- | :--- | :--- |
-| `anki_url` | `"http://127.0.0.1:8765"` | AnkiConnect HTTP API URL. |
-| `deck` | Exact deck name | Name of target Anki deck. |
-| `model` | Exact note type name | Anki Note Type (e.g., `"Basic"`). |
-| `source_field` | Field name | Field containing text to read aloud. |
-| `target_field` | Field name | Field to store `[sound:...]` tag. |
-| `voice` | Edge TTS voice string | Voice identifier (e.g., `"fi-FI-HarriNeural"`). |
-| `overwrite_mode` | `"skip_if_exists"` / `"append"` / `"overwrite"` | Behavior when audio tag exists. |
-
-*For in-depth documentation on note layouts, reverse cards, and card templates, see [docs/CARD_STRUCTURES.md](docs/CARD_STRUCTURES.md).*
-
----
-
-## CLI Usage
-```bash
-# Preview mode (Dry-run, safe default)
-uv run anki-tts
-
-# Test run on 1 single note (Requires card editor in Anki to be closed)
-uv run anki-tts --limit 1 --apply
-
-# Process full deck
-uv run anki-tts --apply
-
-# Global installation as a CLI tool
-uv tool install .
 ```
 
 ---
