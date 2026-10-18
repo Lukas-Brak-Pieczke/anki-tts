@@ -8,9 +8,9 @@ ANKI_URL = "http://127.0.0.1:8765"
 
 def anki_request(action: str, **params):
     """Helper function to communicate with AnkiConnect API using standard library."""
-    payload = json.dumps(
-        {"action": action, "version": 6, "params": params}
-    ).encode("utf-8")
+    payload = json.dumps({"action": action, "version": 6, "params": params}).encode(
+        "utf-8"
+    )
     req = urllib.request.Request(
         ANKI_URL, data=payload, headers={"Content-Type": "application/json"}
     )
@@ -66,18 +66,14 @@ def discover_and_select_decks() -> list[dict]:
         )
 
     # Print interactive table
-    print(
-        f"{'ID':<4} | {'Deck Name':<32} | {'Note Type (Model)':<28} | {'Cards':<8}"
-    )
+    print(f"{'ID':<4} | {'Deck Name':<32} | {'Note Type (Model)':<28} | {'Cards':<8}")
     print("-" * 80)
     for item in discovered:
         deck_disp = (
             item["deck"][:29] + "..." if len(item["deck"]) > 32 else item["deck"]
         )
         model_disp = (
-            item["model"][:25] + "..."
-            if len(item["model"]) > 28
-            else item["model"]
+            item["model"][:25] + "..." if len(item["model"]) > 28 else item["model"]
         )
         print(
             f"[{item['id']:>2}] | {deck_disp:<32} | {model_disp:<28} | {item['count']:<8}"
@@ -86,9 +82,7 @@ def discover_and_select_decks() -> list[dict]:
 
     # User input selection
     user_input = (
-        input(
-            "\nEnter the deck IDs to process (e.g., 1, 3 or 'all') [default: all]: "
-        )
+        input("\nEnter the deck IDs to process (e.g., 1, 3 or 'all') [default: all]: ")
         .strip()
         .lower()
     )
@@ -98,9 +92,7 @@ def discover_and_select_decks() -> list[dict]:
 
     selected_items = []
     try:
-        indices = [
-            int(x.strip()) for x in user_input.split(",") if x.strip().isdigit()
-        ]
+        indices = [int(x.strip()) for x in user_input.split(",") if x.strip().isdigit()]
         selected_items = [item for item in discovered if item["id"] in indices]
     except ValueError:
         print("❌ Invalid input format.")
@@ -112,6 +104,4 @@ def discover_and_select_decks() -> list[dict]:
 if __name__ == "__main__":
     selected = discover_and_select_decks()
     if selected:
-        print(
-            f"\nSelected {len(selected)} deck(s): {[s['deck'] for s in selected]}"
-        )
+        print(f"\nSelected {len(selected)} deck(s): {[s['deck'] for s in selected]}")

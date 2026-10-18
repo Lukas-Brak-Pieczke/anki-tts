@@ -1,52 +1,43 @@
 import json
-import urllib.request
+import os
 import urllib.error
-from typing import Any, Dict, List
+import urllib.request
 
-class AnkiConnectError(Exception):
-    pass
 
-class AnkiConnectClient:
-    def __init__(self, url: str = "http://127.0.0.1:8765", timeout: int = 10):
+class AnkiClient:
+    def __init__(self, url: str = "http://127.0.0.1:8765"):
         self.url = url
-        self.timeout = timeout
 
-    def invoke(self, action: str, **params) -> Any:
-        payload = json.dumps({"action": action, "version": 6, "params": params}).encode("utf-8")
+    def invoke(self, action: str, **params):
+        payload = json.dumps({"action": action, "version": 6, "params": params}).encode(
+            "utf-8"
+        )
         req = urllib.request.Request(
             self.url,
             data=payload,
-            headers={"Content-Type": "application/json"}
+            headers={"Content-Type": "application/json"},
         )
-
         try:
-            with urllib.request.urlopen(req, timeout=self.timeout) as response:
+            with urllib.request.urlopen(req) as response:
                 res = json.loads(response.read().decode("utf-8"))
+                if res.get("error"):
+                    raise Exception(res["error"])
+                return res["result"]
         except urllib.error.URLError as e:
-            raise AnkiConnectError(
-                f"Could not connect to AnkiConnect at {self.url}. "
-                f"Ensure Anki is running and the AnkiConnect add-on is enabled. Details: {e}"
-            )
+            raise RuntimeError(
+                f"Cannot connect to AnkiConnect at {self.url}. Ensure Anki is running."
+            ) from e
 
-        if res.get("error") is not None:
-            err_msg = str(res["error"])
-            if "editor" in err_msg.lower():
-                raise AnkiConnectError(
-                    "ERROR: An open note editor in Anki is blocking database operations! "
-                    "Please close the card editor window in Anki and try again."
-                )
-            raise AnkiConnectError(f"AnkiConnect API error: {err_msg}")
-
-        return res.get("result")
-
-    def find_notes(self, query: str) -> List[int]:
+    def find_notes(self, query: str) -> list[int]:
         return self.invoke("findNotes", query=query)
 
-    def get_notes_info(self, note_ids: List[int]) -> List[Dict[str, Any]]:
+    def get_notes_info(self, note_ids: list[int]) -> list[dict]:
         return self.invoke("notesInfo", notes=note_ids)
 
-    def store_media_file(self, filename: str, base64_data: str) -> str:
-        return self.invoke("storeMediaFile", filename=filename, data=base64_data)
+    def store_media_file(self, filename: str, path: str | None = None):
+        file_path = path if path else os.path.abspath(filename)
+        base_name = os.path.basename(filename)
+        return self.invoke("storeMediaFile", filename=base_name, path=file_path)
 
-    def update_note_fields(self, note_id: int, fields: Dict[str, str]) -> None:
-        self.invoke("updateNoteFields", note={"id": note_id, "fields": fields})
+    def update_note_fields(self, note_id: int, fields: dict):
+        return self.invoke("updateNoteFields", note={"id": note_id, "fields": fields})

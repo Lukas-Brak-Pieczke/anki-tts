@@ -2,8 +2,8 @@ import unittest
 from anki_tts.text_cleaner import clean_text_for_tts
 from anki_tts.tts_engine import get_audio_filename
 
-class TestAnkiTTS(unittest.TestCase):
 
+class TestAnkiTTS(unittest.TestCase):
     def test_single_word_cleaning(self):
         self.assertEqual(clean_text_for_tts("<b>tammikuu</b>"), "tammikuu")
 
@@ -24,11 +24,12 @@ class TestAnkiTTS(unittest.TestCase):
         f1 = get_audio_filename("tammikuu", "fi-FI-HarriNeural")
         f2 = get_audio_filename("tammikuu", "fi-FI-HarriNeural")
         f3 = get_audio_filename("tammikuu", "fi-FI-SelmaNeural")
-        
+
         self.assertEqual(f1, f2)
         self.assertNotEqual(f1, f3)
         self.assertTrue(f1.startswith("tts_"))
         self.assertTrue(f1.endswith(".mp3"))
+
 
 if __name__ == "__main__":
     unittest.main()
